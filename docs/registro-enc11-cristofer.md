@@ -1,47 +1,22 @@
-Folha de registro — Encontro de 15/10
-Arquitetura de Software SAAS · o CampoConta rodando
-Nome: _Cristofer Mateus Rutzen_  
-O que é: o seu registro dos seis experimentos (frente) e o primeiro desenho dos serviços do seu produto (verso). O que não é: prova. Os comandos estão em experimentos.md, no repositório.
-☐ Frente: a resposta de abertura e as seis previsões, cada uma escrita ANTES de rodar.
-☐ Verso: as caixas do seu produto e as quatro respostas.
-☐ Verso fotografado antes de entregar a folha ao professor.
-Não entra aqui: comando copiado, saída do terminal colada.
-Abertura (2 min, sem consulta). O que é um microsserviço? E o que muda nele quando o produto é multi-tenant?
-O microsserviço é um componente autônomo, desacoplado e focado em um único domínio de negócio, 
-que possui seu próprio ciclo de deploy, escala independentemente e gerencia sua própria base de dados persistente. Ele muda quando o produto é multi-tenant pois todo o ciclo de vida da requisição 
-e do dado precisa ser isolado por inquilino (tenant). As requisições exigem contexto de identificação (ex.: tenant_id via cabeçalhos/tokens JWT) e as operações de 
-banco/armazenamento precisam garantir segregação lógica ou física para impedir vazamento de dados entre clientes distintos.
-
-Os seis experimentos. Previsão antes do sinal; "O que saiu", depois de rodar; "O nome disso", com o professor, no fim de cada experimento.
-Experimento	Minha previsão	O que saiu	O nome disso
-1 — Seguir uma requisição			
-2 — A Buricá tenta ver o dado da Alvorada			
-3 — O relatório da diretoria			
-4 — A cobrança sai do ar			
-5 — O mesmo evento chega duas vezes			
-6 — O vizinho barulhento			
-
-No fim do encontro (2 min). Releia a sua resposta de abertura e reescreva:
-
-
-Verso — agora o seu produto
-É o produto que a sua equipe propôs no começo do semestre e vai defender em 29/10, na Etapa 2, com dois serviços no ar. O CampoConta não é o seu projeto: use o formato do desenho, não a divisão dele.
-1. As caixas. Desenhe a porta de entrada, os dois serviços e onde cada um guarda dado. Ponha uma seta para cada conversa entre eles.
-
-
-2. Quatro respostas, uma linha cada. "Ainda não sei" vale, desde que escrito: vira a sua primeira pendência até 29/10.
-a) Qual é o segundo serviço, e o que ele recebe do primeiro?
-
-
-b) Onde o tenant é descoberto, e como chega ao segundo serviço?
-
-
-c) Se alguém esquecer o filtro no código, o que segura o vazamento?
-
-
-d) Se o segundo serviço cair, o que o usuário ainda consegue fazer?
-
-
-Em casa, até sábado, 17/10, 23h59: passe este verso para o arquivo docs/servicos-rascunho.md no repositório do seu projeto: salve a foto do desenho na pasta docs/, 
-cite o nome dela no arquivo e digite as quatro respostas. Faça o commit e o push. Um arquivo por projeto: se o projeto é de dupla, cada um faz o commit com as respostas combinadas. 
-É o rascunho do ADR de comunicação que a Etapa 2 pede.
+Folha de Registro — Encontro de 15/10Arquitetura de Software SAAS · o CampoConta rodandoNome: ______________________________Unidade de PI: ______________________________Frente da FolhaAbertura (2 min, sem consulta)O que é um microsserviço?É um componente autônomo, desacoplado e focado em um único domínio de negócio (Bounded Context), com ciclo de deploy independente e banco de dados próprio.E o que muda nele quando o produto é multi-tenant?Todo o ciclo de vida da requisição e a persistência precisam de isolamento por cliente (tenant). As requisições exigem contexto de identificação (ex.: tenant_id via token/header) e o banco precisa garantir segregação lógica ou física para impedir vazamento de dados entre empresas.Os Seis ExperimentosExperimentoMinha previsão (antes)O que saiu (depois)O nome disso1 — Seguir uma requisiçãoA requisição recebe um ID único na entrada que é repassado a todos os serviços para podermos rastreá-la nos logs.Logs correlacionados em diferentes serviços com o mesmo identificador de ponta a ponta.Rastreamento Distribuído (Correlation ID / Tracing)2 — A Buricá tenta ver o dado da AlvoradaA tentativa é bloqueada com erro 403 Forbidden ou lista vazia, impedindo acesso a dados alheios.A consulta retornou lista vazia ([]) ou acesso não autorizado, isolando os dados de cada tenant.Isolamento de Tenant / Segregação de Dados (Data Isolation / RLS)3 — O relatório da diretoriaA consulta analítica pesada vai consumir recursos da base de dados e degradar as operações diárias dos usuários.Queda de desempenho nas operações transacionais devido ao consumo excessivo de CPU/memória no banco compartilhado.Separação OLTP vs. OLAP (Réplica de Leitura / CQRS)4 — A cobrança sai do arO serviço que gera a venda/pedido falha ou fica travado aguardando resposta da cobrança.Falha em cascata (se chamada síncrona direta) ou enfileiramento assíncrono mantendo o fluxo estável.Falha em Cascata (Cascading Failure) / Resiliência (Circuit Breaker)5 — O mesmo evento chega duas vezesO sistema pode cobrar ou duplicar registros se não conferir se a mensagem já foi processada.O segundo evento foi reconhecido como duplicado e descartado com segurança, sem duplicar o registro.Idempotência (Idempotent Consumer)6 — O vizinho barulhentoUma empresa consumindo requisições em massa vai esgotar o pool de conexões e deixar o sistema lento para as demais.A carga alta do tenant agressivo aumentou a latência e afetou os tempos de resposta dos outros clientes.Efeito do Vizinho Barulhento (Noisy Neighbor) / Rate LimitingNo fim do encontro (2 min)Releia a sua resposta de abertura e reescreva:Microsserviço é uma unidade independente de negócio e infraestrutura. No modelo multi-tenant, ele não opera de forma agnóstica: todo fluxo exige a identidade do inquilino (tenant_id), com isolamento rigoroso de dados (RLS, schema ou base dedicada), observabilidade contextualizada e proteção de recursos (rate limit por tenant) para evitar contaminação de segurança ou lentidão mútua entre clientes.Verso — O Seu Produto (Rascunho de Arquitetura)Foto do desenho: docs/desenho-servicos.jpg (salve a foto do verso da folha na pasta docs/ com este nome)1. As Caixas (Diagrama de Serviços)  [ Cliente / Front-end ]
+            │ (HTTP com JWT + tenant_id)
+            ▼
+    ┌───────────────┐
+    │  API Gateway  │
+    └───────┬───────┘
+            │
+            ├─────────────────────────────────────────┐
+            │                                         │
+            ▼                                         ▼
+   ┌─────────────────┐                       ┌─────────────────┐
+   │   Serviço 1     │   Assíncrono (Fila)   │   Serviço 2     │
+   │  (ex: Pedidos)  ├──────────────────────►│ (ex: Cobrança)  │
+   └────────┬────────┘  (Mensagem com        └────────┬────────┘
+            │           tenant_id + payload)          │
+            ▼                                         ▼
+   ┌─────────────────┐                       ┌─────────────────┐
+   │    Banco S1     │                       │    Banco S2     │
+   │  (com RLS ou    │                       │  (com RLS ou    │
+   │  tenant_id)     │                       │  tenant_id)     │
+   └─────────────────┘                       └─────────────────┘
+2. Quatro Respostasa) Qual é o segundo serviço, e o que ele recebe do primeiro?É o Serviço de Cobrança/Processamento, e ele recebe do primeiro um evento contendo identificador da transação, valor e o tenant_id.b) Onde o tenant é descoberto, e como chega ao segundo serviço?É descoberto no API Gateway a partir da validação do token JWT e repassado ao segundo serviço encapsulado nos metadados da mensagem na fila.c) Se alguém esquecer o filtro no código, o que segura o vazamento?Políticas de Row-Level Security (RLS) configuradas diretamente no banco de dados (ou esquemas/bancos isolados por tenant).d) Se o segundo serviço cair, o que o usuário ainda consegue fazer?O usuário continua navegando e emitindo solicitações normalmente no Serviço 1, pois as tarefas pendentes ficam armazenadas na fila até a recuperação do segundo serviço.
