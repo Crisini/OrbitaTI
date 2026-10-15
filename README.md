@@ -2,14 +2,14 @@
 
 CRM enxuto e multi-tenant para profissionais de TI autônomos e consultorias de até dez pessoas.
 
-**Disciplina:** Arquitetura de Software SaaS (8512) — EC7, SETREM 2026-2
+**Disciplina:** Arquitetura de Software SaaS (8512) — EC6, SETREM 2026-2
 **Unidade:** Andriel Schultz e Cristofer
 
 ---
 
 ## O problema
 
-Profissional de TI que pega trabalho por fora vive de indicação, mas o relacionamento que gera o próximo contrato não mora em lugar nenhum — está espalhado entre WhatsApp, e-mail e uma planilha desatualizada. O OrbitaTI existe para mostrar quem está esfriando antes que se perca.
+Profissional de TI que pega trabalho por fora vive de indicação, mas o relacionamento que gera o próximo contrato não mora em lugar nenhum — está espalhado entre WhatsApp, e-mail e uma planilha desatualizada. O OrbitaTI existe para mostrar que é possível se organizar.
 
 ## Decisões de arquitetura em uma linha
 
